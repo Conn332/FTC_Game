@@ -1,0 +1,14 @@
+Gameplay:
+	-add thowable rocks *
+	-add walls
+	-add levels
+	-add objectives
+	-add health
+	-add enemy attacks
+	-add enemy health
+	-add repair packs
+Graphics:
+	-add up and down animations
+	-add diagonal animations
+Back-End:
+	-organize pictures

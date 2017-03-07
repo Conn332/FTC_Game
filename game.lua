@@ -2,8 +2,8 @@ local game = {}
 
 function game:new()
 	local o = {
-		["battery"] = 5,
-		["batteryMax"] = 5,
+		["battery"] = 60*15,
+		["batteryMax"] = 60*15,
 		["gameover"] = false,
 		["fading"] = 5,
 		["fadingMax"] = 5
