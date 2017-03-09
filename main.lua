@@ -11,6 +11,7 @@ function love.load()
 	OLevel = require "level"
 
 	title = require "title"
+
 	level1 = require "level1"
 	level2 = require "level2"
 	level3_1 = require "level3_1"
@@ -19,6 +20,8 @@ function love.load()
 	level3_lab_2 = require "level3_lab_2"
 	level3_lab_3 = require "level3_lab_3"
 	level4 = require "level4"
+
+	finalCut = require "finalCut"
 
 
 	bgs = love.filesystem.getDirectoryItems("backgrounds")
@@ -33,7 +36,8 @@ function love.load()
 		level3_lab_1:new(player, "final_sprites/levels/level_3_lab_1.png"),
 		level3_lab_2:new(player, "final_sprites/levels/level_3_lab_2.png"),
 		level3_lab_3:new(player, "final_sprites/levels/level_3_lab_3.png"),
-		level4:new(player, "final_sprites/levels/level_4.png")
+		level4:new(player, "final_sprites/levels/level_4.png"),
+		finalCut:new()
 	}
 
 	level = 1
