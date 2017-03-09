@@ -5,27 +5,27 @@ function player:new()
 		["x"] = 0,
 		["y"] = 0,
 		["acc"] = 1000,
-		["hp"] = 100,
+		["hp"] = 4,
 		["friction"] = .2,
 		["vel"] = {["hor"] = 0, ["ver"] = 0},
 		["images"] = {
-				{love.graphics.newImage("player/robot_1_standing.png"), love.graphics.newImage("player/robot_1_moving.png")}, --left
-				{love.graphics.newImage("player/robot_2_standing.png"), love.graphics.newImage("player/robot_2_moving.png")}, --down
-				{love.graphics.newImage("player/robot_3_standing.png"), love.graphics.newImage("player/robot_3_moving.png")}, --right
-				{love.graphics.newImage("player/robot_4_standing.png"), love.graphics.newImage("player/robot_4_moving.png")}, --up
-				{love.graphics.newImage("player/robot_5_standing.png"), love.graphics.newImage("player/robot_5_moving.png")}, --down left
-				{love.graphics.newImage("player/robot_6_standing.png"), love.graphics.newImage("player/robot_6_moving.png")}, --down right
-				{love.graphics.newImage("player/robot_7_standing.png"), love.graphics.newImage("player/robot_7_moving.png")}, --up left
-				{love.graphics.newImage("player/robot_8_standing.png"), love.graphics.newImage("player/robot_8_moving.png")}, --up right
-				{love.graphics.newImage("player/robot_1_hitting.png")}, --left 9
-				{love.graphics.newImage("player/robot_2_hitting.png")}, --down 10
-				{love.graphics.newImage("player/robot_3_hitting.png")}, --right 11
-				{love.graphics.newImage("player/robot_4_hitting.png")}, --up 12
-				{love.graphics.newImage("player/robot_5_hitting.png")}, --down left 13
-				{love.graphics.newImage("player/robot_6_hitting.png")}, --down right 14
-				{love.graphics.newImage("player/robot_7_hitting.png")}, --up left 15
-				{love.graphics.newImage("player/robot_8_hitting.png")}, --up right 16
-				{love.graphics.newImage("player_hit.png")} --17
+				{love.graphics.newImage("final_sprites/robot_sprites/robot_1_standing.png"), love.graphics.newImage("final_sprites/robot_sprites/robot_1_moving.png")}, --left
+				{love.graphics.newImage("final_sprites/robot_sprites/robot_2_standing.png"), love.graphics.newImage("final_sprites/robot_sprites/robot_2_moving.png")}, --down
+				{love.graphics.newImage("final_sprites/robot_sprites/robot_3_standing.png"), love.graphics.newImage("final_sprites/robot_sprites/robot_3_moving.png")}, --right
+				{love.graphics.newImage("final_sprites/robot_sprites/robot_4_standing.png"), love.graphics.newImage("final_sprites/robot_sprites/robot_4_moving.png")}, --up
+				{love.graphics.newImage("final_sprites/robot_sprites/robot_5_standing.png"), love.graphics.newImage("final_sprites/robot_sprites/robot_5_moving.png")}, --down left
+				{love.graphics.newImage("final_sprites/robot_sprites/robot_6_standing.png"), love.graphics.newImage("final_sprites/robot_sprites/robot_6_moving.png")}, --down right
+				{love.graphics.newImage("final_sprites/robot_sprites/robot_7_standing.png"), love.graphics.newImage("final_sprites/robot_sprites/robot_7_moving.png")}, --up left
+				{love.graphics.newImage("final_sprites/robot_sprites/robot_8_standing.png"), love.graphics.newImage("final_sprites/robot_sprites/robot_8_moving.png")}, --up right
+				{love.graphics.newImage("final_sprites/robot_sprites/robot_1_hitting.png")}, --left 9
+				{love.graphics.newImage("final_sprites/robot_sprites/robot_2_hitting.png")}, --down 10
+				{love.graphics.newImage("final_sprites/robot_sprites/robot_3_hitting.png")}, --right 11
+				{love.graphics.newImage("final_sprites/robot_sprites/robot_4_hitting.png")}, --up 12
+				{love.graphics.newImage("final_sprites/robot_sprites/robot_5_hitting.png")}, --down left 13
+				{love.graphics.newImage("final_sprites/robot_sprites/robot_6_hitting.png")}, --down right 14
+				{love.graphics.newImage("final_sprites/robot_sprites/robot_7_hitting.png")}, --up left 15
+				{love.graphics.newImage("final_sprites/robot_sprites/robot_8_hitting.png")}, --up right 16
+				{love.graphics.newImage("final_sprites/robot_sprites/robot_ouch.png")} --17
 			},
 		["i"] = 1,
 		["frame"] = 1,
@@ -34,9 +34,10 @@ function player:new()
 		["rTimer"] = 0,
 		["ORock"] = require "rock",
 		["rocks"] = {},
-		["mRange"] = 50,
+		["mRange"] = 75,
 		["xmod"] = -1,
-		["ymod"] = 0
+		["ymod"] = 0,
+		["ouch"] = 0
 		
 	}
 
@@ -122,7 +123,7 @@ function player:update(dt)
 	else
 		if love.keyboard.isDown("i") then
 			self.rTimer = 1
-			table.insert(self.rocks,self.ORock:new((self.i-1)*300*2-300,self.vel.ver/2,self.x,self.y,self))
+			table.insert(self.rocks,self.ORock:new(300*self.xmod,300*self.ymod,self.x,self.y,self))
 		end
 	end
 	if #self.rocks > 0 then
@@ -136,8 +137,21 @@ function player:update(dt)
 		end
 	end
 
+	local lx = self.x
+	local ly = self.y
+
 	self.x = self.x + self.vel.hor*dt
+
+	if self.level:checkCollision() then
+		self.x = lx
+	end
+
 	self.y = self.y + self.vel.ver*dt
+
+	if self.level:checkCollision() then
+		self.y = ly
+	end
+
 	if math.abs(self.vel.ver) == 0 then
 		if self.vel.hor > 5 then --right
 			self.i = 3
@@ -198,15 +212,18 @@ function player:update(dt)
 		end
 	end
 
+	if self.ouch > 0 then
+		self.i = 17
+		self.frame = 1
+	end
+
 	if self.fTimer <= 0 then
 		self.frame = self.frame+1
 		if self.frame > 2 then self.frame = 1 end
 		self.fTimer = self.fTimer + .1 
 	end
-
-	if love.keyboard.isDown("o") then
-		self.i = 5
-		self.frame = 1
+	if self.ouch > 0 then
+		self.ouch = self.ouch-dt
 	end
 
 	self.vel.hor = self.vel.hor*(1-self.friction*60*dt)
@@ -223,6 +240,7 @@ function player:update(dt)
 		self.frame = #self.images[self.i]
 	end
 
+
 end
 function player:draw()
 	love.graphics.setColor(255,255,255)
@@ -231,6 +249,10 @@ function player:draw()
 	for i,v in ipairs(self.rocks) do
 		v:draw()
 	end
+	love.graphics.setColor(255,0,0)
+	love.graphics.rectangle("fill",200,10,400,30)
+	love.graphics.setColor(0,255,0)
+	love.graphics.rectangle("fill",200,10,400*self.hp/4,30)
 end
 
 return player

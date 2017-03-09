@@ -1,14 +1,17 @@
 local level = {}
 e = require "enemy"
+b = require "background"
 
 function level:new(player,background)
 	local o = {
 		["enemies"] = {},
 		["player"] = player,
-		["background"] = background,
+		["background"] = b:new(background,player),
 		["walls"] = { 
 			{0,0,200,100}
-		}
+		},
+		["done"] = false,
+		["type"] = "level"
 	}
 
 	setmetatable(o, self)
@@ -17,35 +20,50 @@ function level:new(player,background)
 	return o
 end
 function level:update(dt)
-	for _,v in ipairs(self.enemies) do
+	for i,v in ipairs(self.enemies) do
 		v:update(dt)
 	end
+
+	v = self.walls[#self.walls]
+	if self.player.x > v[1] and self.player.y > v[2] and self.player.x < v[3] and self.player.y < v[4] then
+		self.done = true
+	end	
 end
-function level:addEnemy(type,x,y)
+function level:newEnemy(type,x,y)
 	table.insert(self.enemies,e:new(x,y,self.player))
 end
 function level:complete()
-
+	return self.done
 end
 function level:checkCollision()
-	for _,v in iparis(self.walls) do
+	for _,v in ipairs(self.walls) do
 		if self.player.x > v[1] and self.player.y > v[2] and self.player.x < v[3] and self.player.y < v[4] then
-			return true
-		else
 			return false
 		end
 	end
+	return true
+end
+function level:checkEnemyCollision(e)
+	for _,v in ipairs(self.walls) do
+		if e.pos.x > v[1] and e.pos.y > v[2] and e.pos.x < v[3] and e.pos.y < v[4] then
+			return false
+		end
+	end
+	return true
 end
 function level:checkAttack(x1,y1,x2,y2)
 
-	for _,v in ipairs(self.enemies) do
+	for i,v in ipairs(self.enemies) do
 		local x = v.pos.x
-		if x >= x1 and x <= x2 and y >= y1 and y <= y2 then
+		local y = v.pos.y
+		if x >= x1 and x <= x2 and y >= y1 and y <= y2 and v.hp > 0 then
+			v.hp = v.hp-1
+			v.ouch = .5
 			return true
-		else
-			return false
 		end
 	end
+
+	return false
 end
 function level:draw()
 	self.background:draw()
