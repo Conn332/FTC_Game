@@ -23,8 +23,12 @@ function level:new(player,background)
 		["done"] = false,
 		["type"] = "level",
 		["text"] = {
-			{"Test!",1500,300}
-		}
+			{"Hello recuit! Welcome to Earth! WASD to move.",1595,380,30},
+			{"For longer than we can remember, the human race has been on a spaceship orbiting Earth",1190,-115,60},
+			{"We've been up here so long that we have forgotten why we left in the first place", 850, 390,45},
+			{"Your mission is to follow these pre-recorded messages and determine if it is safe for the human race to return to Earth", 555, -50,75}
+		},
+		["nature"] = love.audio.newSource("sound/Nature.mp3","static")
 	}
 
 	setmetatable(o, self)
@@ -35,6 +39,8 @@ end
 function level:start()
 	self.player.x = 1550
 	self.player.y = 475
+	self.nature:setLooping(true)
+	self.nature:play()
 end
 function level:update(dt)
 	for i,v in ipairs(self.enemies) do
@@ -42,6 +48,7 @@ function level:update(dt)
 	end
 	v = self.walls[11]
 	if self.player.x > v[1] and self.player.y > v[2] and self.player.x < v[3] and self.player.y < v[4] then
+		self.nature:stop()
 		self.done = true
 	end
 end
@@ -67,14 +74,18 @@ function level:checkEnemyCollision(e)
 	end
 	return true
 end
-function level:checkAttack(x1,y1,x2,y2)
+function level:checkAttack(x1,y1,x2,y2,ranged)
 
 	for i,v in ipairs(self.enemies) do
 		local x = v.pos.x
 		local y = v.pos.y
 		if x >= x1 and x <= x2 and y >= y1 and y <= y2 and v.hp > 0 then
-			v.hp = v.hp-1
-			v.ouch = .5
+			if ranged then
+				v.ouch = 1
+			else
+				v.hp = v.hp-1
+				v.ouch = .5
+			end
 			return true
 		end
 	end
@@ -86,9 +97,11 @@ function level:draw()
 
 	local w,h = love.graphics.getDimensions()
 
-	love.graphics.setColor(255,255,255)
 	for _,v in ipairs(self.text) do
-		love.graphics.print(v[1],v[2]-self.player.x+w/2,v[3]-self.player.y+h/2)
+		love.graphics.setColor(100,100,255)
+		love.graphics.rectangle("fill",v[2]-self.player.x+w/2,v[3]-self.player.y+h/2,200,v[4])
+		love.graphics.setColor(255,255,255)
+		love.graphics.printf(v[1],v[2]-self.player.x+w/2,v[3]-self.player.y+h/2,200)
 	end
 
 	for _,v in ipairs(self.enemies) do

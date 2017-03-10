@@ -22,6 +22,9 @@ function love.load()
 	level4 = require "level4"
 
 	finalCut = require "finalCut"
+	credits = require "credits"
+
+	lab = love.audio.newSource("sound/Labs.mp3")
 
 
 	bgs = love.filesystem.getDirectoryItems("backgrounds")
@@ -37,12 +40,16 @@ function love.load()
 		level3_lab_2:new(player, "final_sprites/levels/level_3_lab_2.png"),
 		level3_lab_3:new(player, "final_sprites/levels/level_3_lab_3.png"),
 		level4:new(player, "final_sprites/levels/level_4.png"),
-		finalCut:new()
+		finalCut:new(),
+		credits:new("cutscenes/Credits.png")
 	}
 
 	level = 1
 
-	player:setLevel(levels[1])
+	player:setLevel(levels[level])
+	if levels[level].start then
+		levels[level]:start()
+	end
 	game = OGame:new()
 end
 function love.mousereleased(x,y,b)
@@ -66,7 +73,9 @@ function love.update(dt)
 	if not game.gameover and levels[level].type == "level" then
 		player:update(dt)
 	end
-	--game:update(dt)
+	if levels[level].type == "level" then
+		game:update(dt)
+	end
 	levels[level]:update(dt)
 
 	local complete, n = levels[level]:complete()
@@ -79,12 +88,19 @@ function love.update(dt)
 		player:setLevel(levels[level])
 		if levels[level].start then 
 			levels[level]:start() 
+			if level == 6 then
+				lab:setLooping(true)
+				lab:play()
+			end
+			if level == 9 then
+				lab:stop()
+			end
 		end
 	end
 	if player.hp == 0 then 
 		player.hp = 4
 		player.ouch = 2
-		game.battery = game.batter-15
+		game.battery = game.battery-15
 	end
 end
 function love.draw()
@@ -96,7 +112,5 @@ function love.draw()
 		player:draw()
 		game:draw()
 		local w,h = love.graphics.getDimensions()
-		love.graphics.print(tostring(player.x+love.mouse.getX()-w/2),0,100)
-		love.graphics.print(tostring(player.y+love.mouse.getY()-h/2),0,110)
 	end
 end

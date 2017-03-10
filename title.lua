@@ -12,6 +12,9 @@ function cutscene:new(background)
 
 	return o
 end
+function cutscene:start()
+	self.done = false
+end
 function cutscene:complete()
 	return self.done
 end

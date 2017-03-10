@@ -9,10 +9,15 @@ function level:new(player,background)
 		["background"] = b:new(background,player),
 		["walls"] = { 
 			{-130,985,490,1690},
-			{-130,935,490,985}
+			{20,1690,330,1850},
+			{100,1140,260,1240}
 		},
 		["done"] = false,
-		["type"] = "level"
+		["type"] = "level",
+		["note"] = love.graphics.newImage("final_sprites/note.png"),
+		["text"] = {
+			{"Those look like lab notes up ahead! Go get them so we can examine them while you continue exploring.",30,1465,60}
+		}
 	}
 
 	setmetatable(o, self)
@@ -56,14 +61,18 @@ function level:checkEnemyCollision(e)
 	end
 	return true
 end
-function level:checkAttack(x1,y1,x2,y2)
+function level:checkAttack(x1,y1,x2,y2,ranged)
 
 	for i,v in ipairs(self.enemies) do
 		local x = v.pos.x
 		local y = v.pos.y
 		if x >= x1 and x <= x2 and y >= y1 and y <= y2 and v.hp > 0 then
-			v.hp = v.hp-1
-			v.ouch = .5
+			if ranged then
+				v.ouch = 1
+			else
+				v.hp = v.hp-1
+				v.ouch = .5
+			end
 			return true
 		end
 	end
@@ -72,9 +81,23 @@ function level:checkAttack(x1,y1,x2,y2)
 end
 function level:draw()
 	self.background:draw()
+
+	local w,h = love.graphics.getDimensions()
+
+	for _,v in ipairs(self.text) do
+		love.graphics.setColor(100,100,255)
+		love.graphics.rectangle("fill",v[2]-self.player.x+w/2,v[3]-self.player.y+h/2,200,v[4])
+		love.graphics.setColor(255,255,255)
+		love.graphics.printf(v[1],v[2]-self.player.x+w/2,v[3]-self.player.y+h/2,200)
+	end
+
 	for _,v in ipairs(self.enemies) do
 		v:draw()
 	end
+
+	local w,h = love.graphics.getDimensions()
+
+	love.graphics.draw(self.note,100-self.player.x+w/2,1140-self.player.y+h/2)
 end
 
 return level

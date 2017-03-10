@@ -1,5 +1,7 @@
 local level = {}
 e = require "enemy"
+he = require "heavyEnemy"
+fe = require "fastEnemy"
 b = require "background"
 
 function level:new(player,background)
@@ -27,6 +29,12 @@ end
 function level:start()
 	self.player.x = 990
 	self.player.y = 1220
+	self.enemies = {
+		e:new(-225,1000,self.player,self),
+		he:new(-110,1135,self.player,self),
+		he:new(505,505,self.player,self),
+		fe:new(-50,620,self.player,self)
+	}
 end
 function level:update(dt)
 	for i,v in ipairs(self.enemies) do
@@ -50,7 +58,7 @@ function level:checkCollision()
 			return false
 		end
 	end
-	return false
+	return true
 end
 function level:checkEnemyCollision(e)
 	for _,v in ipairs(self.walls) do
@@ -60,14 +68,18 @@ function level:checkEnemyCollision(e)
 	end
 	return true
 end
-function level:checkAttack(x1,y1,x2,y2)
+function level:checkAttack(x1,y1,x2,y2,ranged)
 
 	for i,v in ipairs(self.enemies) do
 		local x = v.pos.x
 		local y = v.pos.y
 		if x >= x1 and x <= x2 and y >= y1 and y <= y2 and v.hp > 0 then
-			v.hp = v.hp-1
-			v.ouch = .5
+			if ranged then
+				v.ouch = 1
+			else
+				v.hp = v.hp-1
+				v.ouch = .5
+			end
 			return true
 		end
 	end

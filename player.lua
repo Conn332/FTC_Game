@@ -37,7 +37,8 @@ function player:new()
 		["mRange"] = 75,
 		["xmod"] = -1,
 		["ymod"] = 0,
-		["ouch"] = 0
+		["ouch"] = 0,
+		["throw"] = love.audio.newSource("sound/throw.mp3","static")
 		
 	}
 
@@ -75,41 +76,41 @@ function player:update(dt)
 			
 			if self.xmod == 1 then
 				if self.ymod == 1 then --down right
-					self.level:checkAttack(self.x,self.y,self.x+self.mRange,self.y+self.mRange)
+					self.level:checkAttack(self.x,self.y,self.x+self.mRange,self.y+self.mRange,false)
 					self.frame = 1
 					self.i = 14
 				elseif self.ymod == 0 then -- right
-					self.level:checkAttack(self.x,self.y-self.mRange/2,self.x+self.mRange,self.y+self.mRange/2)
+					self.level:checkAttack(self.x,self.y-self.mRange/2,self.x+self.mRange,self.y+self.mRange/2,false)
 					self.frame = 1
 					self.i = 11
 				else -- up right
-					self.level:checkAttack(self.x,self.y,self.x+self.mRange,self.y-self.mRange)
+					self.level:checkAttack(self.x,self.y,self.x+self.mRange,self.y-self.mRange,false)
 					self.frame = 1
 					self.i = 16
 				end
 			elseif self.xmod == 0 then
-				if self.ymod == 1 then --up
-					self.level:checkAttack(self.x-self.mRange/2,self.y,self.x+self.mRange/2,self.y+self.mRange)
+				if self.ymod == -1 then --up
+					self.level:checkAttack(self.x-self.mRange/2,self.y-self.mRange,self.x+self.mRange/2,self.y,false)
 					self.frame = 1
-					self.i = 10
+					self.i = 12
 				elseif self.ymod == 0 then
 					print("wat")
 				else --down
-					self.level:checkAttack(self.x-self.mRange/2,self.y,self.x+self.mRange/2,self.y-self.mRange)
+					self.level:checkAttack(self.x-self.mRange/2,self.y,self.x+self.mRange/2,self.y+self.mRange,false)
 					self.frame = 1
-					self.i = 12
+					self.i = 10
 				end
 			else
 				if self.ymod == 1 then --down left
-					self.level:checkAttack(self.x-self.mRange,self.y,self.x,self.y+self.mRange)
+					self.level:checkAttack(self.x-self.mRange,self.y,self.x,self.y+self.mRange,false)
 					self.frame = 1
 					self.i = 13
 				elseif self.ymod == 0 then --left
-					self.level:checkAttack(self.x-self.mRange,self.y-self.mRange/2,self.x,self.y+self.mRange/2)
+					self.level:checkAttack(self.x-self.mRange,self.y-self.mRange/2,self.x,self.y+self.mRange/2,false)
 					self.frame = 1
 					self.i = 9
 				else --up left
-					self.level:checkAttack(self.x-self.mRange,self.y-self.mRange,self.x,self.y)
+					self.level:checkAttack(self.x-self.mRange,self.y-self.mRange,self.x,self.y,false)
 					self.frame = 1
 					self.i = 15
 				end
@@ -123,6 +124,7 @@ function player:update(dt)
 	else
 		if love.keyboard.isDown("i") then
 			self.rTimer = 1
+			self.throw:play()
 			table.insert(self.rocks,self.ORock:new(300*self.xmod,300*self.ymod,self.x,self.y,self))
 		end
 	end
@@ -151,47 +153,63 @@ function player:update(dt)
 	if self.level:checkCollision() then
 		self.y = ly
 	end
-
 	if math.abs(self.vel.ver) == 0 then
 		if self.vel.hor > 5 then --right
-			self.i = 3
 			self.xmod = 1
 			self.ymod = 0
 		elseif self.vel.hor < -5 then --left
-			self.i = 1
 			self.xmod = -1
 			self.ymod = 0
 		end
 	else --add images here
 		if self.vel.hor == 0 then
 			if self.vel.ver > 5 then --down
-				self.i = 2
 				self.xmod = 0
 				self.ymod = 1
 			elseif self.vel.ver < -5 then --up
-				self.i = 4
 				self.xmod = 0
 				self.ymod = -1
 			end
 		elseif self.vel.hor > 5 then
 			if self.vel.ver > 5 then --down right
-				self.i = 6
 				self.xmod = 1
 				self.ymod = 1
 			elseif self.vel.ver < -5 then --down left
-				self.i = 8
 				self.xmod = 1
 				self.ymod = -1
 			end
 		elseif self.vel.hor < -5 then
 			if self.vel.ver > 5 then --up right
-				self.i = 5
 				self.xmod = -1
 				self.ymod = 1
 			elseif self.vel.ver < -5 then --up left
-				self.i = 7
 				self.xmod = -1
 				self.ymod = -1
+			end
+		end
+	end
+	if self.aTimer <= 0 then
+		if self.xmod > 0 then
+			if self.ymod > 0 then
+				self.i = 6
+			elseif self.ymod == 0 then
+				self.i = 3
+			else
+				self.i = 8
+			end
+		elseif self.xmod == 0 then
+			if self.ymod > 0 then
+				self.i = 2
+			elseif self.ymod < 0 then
+				self.i = 4
+			end
+		else
+			if self.ymod > 0 then
+				self.i = 5
+			elseif self.ymod == 0 then
+				self.i = 1
+			else
+				self.i = 7
 			end
 		end
 	end
@@ -224,6 +242,9 @@ function player:update(dt)
 	end
 	if self.ouch > 0 then
 		self.ouch = self.ouch-dt
+	end
+	if math.abs(self.ouch) < .051 then
+		self.ouch = 0
 	end
 
 	self.vel.hor = self.vel.hor*(1-self.friction*60*dt)

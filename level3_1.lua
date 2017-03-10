@@ -13,7 +13,10 @@ function level:new(player,background)
 			{1795,550,1955,580}
 		},
 		["done"] = false,
-		["type"] = "level"
+		["type"] = "level",
+		["text"] = {
+			{"Captain: We're detecting an unusually high concentration of life signatures ahead, so you may need to...",1970,735,55}
+		}
 	}
 
 	setmetatable(o, self)
@@ -57,14 +60,18 @@ function level:checkEnemyCollision(e)
 	end
 	return true
 end
-function level:checkAttack(x1,y1,x2,y2)
+function level:checkAttack(x1,y1,x2,y2,ranged)
 
 	for i,v in ipairs(self.enemies) do
 		local x = v.pos.x
 		local y = v.pos.y
 		if x >= x1 and x <= x2 and y >= y1 and y <= y2 and v.hp > 0 then
-			v.hp = v.hp-1
-			v.ouch = .5
+			if ranged then
+				v.ouch = 1
+			else
+				v.hp = v.hp-1
+				v.ouch = .5
+			end
 			return true
 		end
 	end
@@ -73,6 +80,16 @@ function level:checkAttack(x1,y1,x2,y2)
 end
 function level:draw()
 	self.background:draw()
+
+	local w,h = love.graphics.getDimensions()
+
+	for _,v in ipairs(self.text) do
+		love.graphics.setColor(100,100,255)
+		love.graphics.rectangle("fill",v[2]-self.player.x+w/2,v[3]-self.player.y+h/2,200,v[4])
+		love.graphics.setColor(255,255,255)
+		love.graphics.printf(v[1],v[2]-self.player.x+w/2,v[3]-self.player.y+h/2,200)
+	end
+
 	for _,v in ipairs(self.enemies) do
 		v:draw()
 	end

@@ -29,7 +29,7 @@ function rock:update(dt)
 		self.x = self.x+self.hvel*dt
 		self.y = self.y+self.vvel*dt
 
-		if self.player.level:checkAttack(self.x-10,self.y-10,self.x+10,self.y+10) then self.timer = 0 end
+		if self.player.level:checkAttack(self.x-10,self.y-10,self.x+10,self.y+10,true) then self.timer = 0 end
 
 		if self.timer <= 0 then
 			self.i = 2

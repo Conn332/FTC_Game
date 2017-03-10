@@ -75,7 +75,7 @@ function enemy:update(dt)
 			self.windup = self.windup-dt
 			if self.windup <=0 and self.ouch <= 0 then
 				self.aTimer = .5
-				if self:getDistance() <= 50 and self.player.ouch <= 0 and self.aTimer <= 0 then
+				if self:getDistance() <= 50 and self.player.ouch <= 0 then
 					self.damage = true
 					self.player.ouch = .5
 					self.player.hp = self.player.hp-1
@@ -161,9 +161,6 @@ function enemy:draw()
 	end
 	local w,h = love.graphics.getDimensions()
 	love.graphics.draw(self.images[self.i][self.frame],self.pos.x-self.player.x+w/2-self.images[self.i][self.frame]:getWidth()/8,self.pos.y-self.player.y+h/2-self.images[self.i][self.frame]:getHeight()/8,0,.25,.25)
-	love.graphics.print(self.aTimer,0,200)
-	love.graphics.print(self.windup,0,210)
-	love.graphics.print(tostring(self.damage),0,220)
 end
 
 return enemy
